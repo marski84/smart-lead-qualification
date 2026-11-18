@@ -1,0 +1,56 @@
+### Register a message (201 Created + Location header)
+POST {{host}}/api/v1/message
+Content-Type: application/json
+
+{
+  "message": "Outage, please help."
+}
+
+> {%
+    client.test("201 Created", function () {
+        client.assert(response.status === 201, "Expected 201, got " + response.status);
+    });
+    // Location points to the report: .../report/{id}
+    const location = response.headers.valueOf("Location");
+    if (location) {
+        client.global.set("messageId", location.split("/").pop());
+    }
+%}
+
+### Validation: empty message (400 Bad Request)
+POST {{host}}/api/v1/message
+Content-Type: application/json
+
+{
+  "message": ""
+}
+
+### Validation: missing message field (400 Bad Request)
+POST {{host}}/api/v1/message
+Content-Type: application/json
+
+{}
+
+### Message status by id (id saved from the first request)
+GET {{host}}/api/v1/message/report/{{messageId}}
+
+### Message status by id: nonexistent id (expected 404)
+GET {{host}}/api/v1/message/report/999999
+
+### Message status by id: invalid id (400, @Positive)
+GET {{host}}/api/v1/message/report/-1
+
+### Message list: default pagination
+GET {{host}}/api/v1/message/report/all
+
+### Message list: first page, 5 per page
+GET {{host}}/api/v1/message/report/all?page=0&size=5
+
+### Message list: custom sorting
+GET {{host}}/api/v1/message/report/all?sort=status,asc&sort=receivedAt,asc
+
+### Message list: page size too large (checks the max-page-size limit)
+GET {{host}}/api/v1/message/report/all?size=100000
+
+### Message list: nonexistent sort property (expected 400)
+GET {{host}}/api/v1/message/report/all?sort=nonexistent

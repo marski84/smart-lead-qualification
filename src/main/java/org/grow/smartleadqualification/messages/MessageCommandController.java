@@ -14,20 +14,20 @@ import java.net.URI;
 @RequestMapping("api/v1/message")
 class MessageCommandController {
 
-    private final MessageService messageService;
+    private final MessageCommandService messageCommandService;
 
-    MessageCommandController(final MessageService messageService) {
-        this.messageService = messageService;
+    MessageCommandController(final MessageCommandService messageCommandService) {
+        this.messageCommandService = messageCommandService;
     }
 
     @PostMapping()
     ResponseEntity<Void> registerMessage(@Valid @RequestBody InboundMessageDto inboundMessageDto) {
-        Message message = messageService.storeMessage(inboundMessageDto);
+        Long id = messageCommandService.storeMessage(inboundMessageDto);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(message.getId())
+                .buildAndExpand(id)
                 .toUri();
 
         return ResponseEntity.created(uri).build();

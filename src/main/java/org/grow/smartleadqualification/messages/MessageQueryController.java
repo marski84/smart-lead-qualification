@@ -18,27 +18,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 class MessageQueryController {
 
-    private final MessageService messageService;
+    private final MessageQueryService messageQueryService;
 
-    MessageQueryController(final MessageService messageService) {
-        this.messageService = messageService;
+    MessageQueryController(final MessageQueryService messageQueryService) {
+        this.messageQueryService = messageQueryService;
     }
 
     @GetMapping("/{id}")
     ResponseEntity<MessageStatusReportDto> getMessageStatusById(@PathVariable @Positive(message = "Message id must be greater than 0") Long id) {
-        Message message = messageService.findById(id);
-        MessageStatusReportDto messageStatusReportDto = MessageConverter.toReportDto(message);
-
-        return ResponseEntity.ok(messageStatusReportDto);
+        return ResponseEntity.ok(messageQueryService.findById(id));
     }
 
     @GetMapping("/all")
     ResponseEntity<PagedModel<MessageStatusReportDto>> getAll(
             @PageableDefault(size = 10, sort = {"receivedAt", "id"}, direction = Sort.Direction.DESC)
             Pageable pageable) {
-        System.out.println(pageable);
-        Page<MessageStatusReportDto> resultPage = messageService.getAll(pageable)
-                .map(MessageConverter::toReportDto);
+        Page<MessageStatusReportDto> resultPage = messageQueryService.getAll(pageable);
         return ResponseEntity.ok(new PagedModel<>(resultPage));
     }
 }
