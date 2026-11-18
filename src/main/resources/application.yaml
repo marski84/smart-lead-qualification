@@ -2,18 +2,34 @@ spring:
   application:
     name: smart-lead-qualification
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+    url: jdbc:postgresql://localhost:54320/postgres?currentSchema=smart_lead
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  flyway:
+    default-schema: smart_lead
+    schemas: smart_lead
   jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        default_schema: smart_lead
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+  #  datasource:
+#    url: jdbc:h2:mem:testdb
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#  h2:
+#    console:
+#      enabled: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
+#    show-sql: true
+#    defer-datasource-initialization: true
 
 qualificator:
   api:

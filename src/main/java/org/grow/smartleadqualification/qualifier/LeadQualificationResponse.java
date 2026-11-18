@@ -39,11 +39,14 @@ public record LeadQualificationResponse(
 
 
     public String answerText() {
+        if (output == null) {
+            throw new LeadQualificatorNoValidResponseException();
+        }
         return output.stream()
-                .filter(item -> "message".equals(item.type()))
+                .filter(item -> "message".equals(item.type()) && item.content() != null)
                 .flatMap(item -> item.content().stream())
-                .filter(part -> "output_text".equals(part.type()))
-                .map(ContentPart::text)
+                .filter(part -> "output_text".equals(part.type()) && part.text() != null)
+                .map(part -> part.text().trim())
                 .findFirst()
                 .orElseThrow(LeadQualificatorNoValidResponseException::new);
     }
