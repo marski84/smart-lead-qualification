@@ -6,6 +6,8 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -19,51 +21,56 @@ class MessageExceptionHandler {
             HttpServletRequest req,
             PropertyReferenceException e
     ) {
-
-        ApiError apiError = new ApiError(
-                req.getRequestURI(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Not valid query params in request",
-                List.of("sort: unknown property: '" + e.getPropertyName() + "'")
-        );
-
-        return ResponseEntity.badRequest().body(apiError);
+        return error(req, HttpStatus.BAD_REQUEST, "Not valid query params in request",
+                List.of("sort: unknown property: '" + e.getPropertyName() + "'"));
     }
-
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleConstraintViolationException(
             HttpServletRequest req,
             ConstraintViolationException e
     ) {
-
         var errors = e.getConstraintViolations().stream().map(ConstraintViolation::getMessage).toList();
-
-        ApiError apiError = new ApiError(
-                req.getRequestURI(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation errors",
-                errors
-        );
-
-        return ResponseEntity.badRequest().body(apiError);
+        return error(req, HttpStatus.BAD_REQUEST, "Validation errors", errors);
     }
-
 
     @ExceptionHandler(MessageNotFoundException.class)
     public ResponseEntity<ApiError> handleMessageNotFoundException(
             HttpServletRequest req,
             MessageNotFoundException e
     ) {
-
-        ApiError apiError = new ApiError(
-                req.getRequestURI(),
-                HttpStatus.NOT_FOUND.value(),
-                "Message not found!",
-                List.of()
-        );
-
-        return ResponseEntity.badRequest().body(apiError);
+        return error(req, HttpStatus.NOT_FOUND, "Message not found!", List.of());
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleMethodArgumentNotValidException(
+            HttpServletRequest req,
+            MethodArgumentNotValidException e
+    ) {
+        var errors = e.getAllErrors().stream().map(err -> err.getDefaultMessage()).toList();
+        return error(req, HttpStatus.BAD_REQUEST, "Validation errors", errors);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleHttpMessageNotReadableException(
+            HttpServletRequest req,
+            HttpMessageNotReadableException e
+    ) {
+        return error(req, HttpStatus.BAD_REQUEST, "Malformed request body",
+                List.of("Request body is missing or is not valid JSON"));
+    }
+
+    /**
+     * Single place that builds the error response, so the HTTP status and the "status" field
+     * in the body always come from the same value.
+     */
+    private ResponseEntity<ApiError> error(
+            HttpServletRequest req,
+            HttpStatus status,
+            String description,
+            List<String> errors
+    ) {
+        ApiError apiError = new ApiError(req.getRequestURI(), status.value(), description, errors);
+        return ResponseEntity.status(status).body(apiError);
+    }
 }
