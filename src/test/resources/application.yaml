@@ -15,9 +15,16 @@ spring:
     properties:
       hibernate:
         default_schema: smart_lead
-
-qualificator:
-  api:
-    url: http://localhost:0/responses
-    model: test-model
-    token: test-token
+  ai:
+    openai:
+      api-key: test-key
+      base-url: http://localhost:1/v1
+      chat:
+        model: test-model
+    model:
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
