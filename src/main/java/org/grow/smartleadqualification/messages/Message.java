@@ -39,9 +39,13 @@ class Message {
 
     private Instant processedDate;
 
-    public void markProcessed(Instant date) {
+    private Boolean isLead;
+
+    public void markProcessed(Instant date, boolean isLead) {
         setStatus(MessageStatus.PROCESSED);
         setProcessedDate(date);
+        setLead(isLead);
+
     }
 
     public void markProcessedFailed(Instant date) {
@@ -52,6 +56,10 @@ class Message {
     public void markProcessing(Instant date) {
         setStatus(MessageStatus.PROCESSING);
         setProcessedDate(date);
+    }
+
+    public void markAsLead(boolean isLeadIndicator) {
+        setLead(isLeadIndicator);
     }
 
 
@@ -69,5 +77,9 @@ class Message {
 
     private void setProcessedDate(final Instant processedDate) {
         this.processedDate = processedDate;
+    }
+
+    private void setLead(boolean lead) {
+        isLead = lead;
     }
 }
