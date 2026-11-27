@@ -10,8 +10,8 @@ class LeadCommandServiceImpl implements LeadCommandService {
     private final LeadRepository leadRepository;
 
     @Override
-    public Lead saveLead(String lead) {
-        Lead newLead = LeadConverter.fromQualifier(lead);
+    public Lead saveLead(Long messageId, String lead) {
+        Lead newLead = LeadConverter.fromQualifier(messageId, lead);
         return leadRepository.save(newLead);
     }
 }

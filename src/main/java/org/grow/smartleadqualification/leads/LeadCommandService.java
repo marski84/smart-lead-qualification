@@ -1,5 +1,5 @@
 package org.grow.smartleadqualification.leads;
 
-interface LeadCommandService {
-    Lead saveLead(String lead);
+public interface LeadCommandService {
+    Lead saveLead(Long messageId, String lead);
 }

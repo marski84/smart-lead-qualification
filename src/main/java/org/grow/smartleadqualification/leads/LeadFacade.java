@@ -11,8 +11,8 @@ public class LeadFacade {
     private final LeadCommandService leadCommandService;
     private final LeadQueryService leadQueryService;
 
-    public void registerLead(String qualifierData) {
-        leadCommandService.saveLead(qualifierData);
+    public void registerLead(Long messageId, String qualifierData) {
+        leadCommandService.saveLead(messageId, qualifierData);
     }
 
     public LeadReportDto getLeadById(Long id) {
